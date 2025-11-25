@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>(주)홈케어 깨끗한집 - 배관 스케일링 예약</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #00AEEF 0%, #0088CC 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #00AEEF 0%, #0088CC 100%); color: white; padding: 40px 30px 30px; text-align: center; }
+        .form-container { padding: 40px 30px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px; }
+        input[type="text"], input[type="tel"], textarea { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; }
+        input:focus, textarea:focus { outline: none; border-color: #00AEEF; box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1); }
+        .date-selector { background: #f0faff; border: 3px solid #00AEEF; border-radius: 12px; padding: 20px; cursor: pointer; text-align: center; transition: all 0.3s; }
+        .date-selector:hover { background: #e0f5ff; transform: scale(1.02); }
+        .date-selector.disabled { background: #f5f5f5; border-color: #ccc; cursor: not-allowed; opacity: 0.6; }
+        .date-selector-text { font-size: 22px; font-weight: 700; color: #00AEEF; }
+        .date-selector-placeholder { color: #999; }
+        .service-options { display: flex; flex-direction: column; gap: 15px; }
+        .service-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; cursor: pointer; position: relative; transition: all 0.3s; }
+        .service-card:hover { border-color: #00AEEF; transform: translateY(-2px); }
+        .service-card.selected { border-color: #00AEEF; background: #f0faff; }
+        .service-card.disabled { background: #f5f5f5; border-color: #ddd; cursor: not-allowed; opacity: 0.5; }
+        .service-content { display: flex; justify-content: space-between; align-items: center; padding-left: 40px; }
+        .service-name { font-size: 16px; font-weight: 600; }
+        .checkmark { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); height: 24px; width: 24px; border: 2px solid #ddd; border-radius: 50%; }
+        .service-card.selected .checkmark { background: #00AEEF; border-color: #00AEEF; }
+        .service-card.selected .checkmark:after { content: ""; position: absolute; display: block; left: 7px; top: 3px; width: 6px; height: 12px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #00AEEF 0%, #0088CC 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 174, 239, 0.4); }
+        .required { color: #e74c3c; }
+        .success-message { display: none; background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #c3e6cb; text-align: center; font-weight: 700; font-size: 18px; }
+        .success-message.show { display: block; animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .price-summary { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 20px; border-radius: 12px; margin-top: 20px; margin-bottom: 20px; }
+        .price-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
+        .price-row:last-child { margin-bottom: 0; border-top: 2px solid rgba(255,255,255,0.3); padding-top: 10px; font-size: 20px; font-weight: 900; }
+        .price-label { opacity: 0.9; }
+        .price-value { font-weight: 700; }
+        .company-info { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0; }
+        .company-info-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
+        .company-links { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .company-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; text-decoration: none; color: #333; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .company-link:hover { border-color: #00AEEF; background: #f0faff; }
+        .process-info { font-size: 12px; color: #666; line-height: 1.6; }
+        .process-step { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .step-num { background: #00AEEF; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+        .calendar-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .calendar-modal.show { display: flex; }
+        .calendar-container { background: white; border-radius: 20px; padding: 30px; max-width: 450px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .calendar-nav-btn { width: 50px; height: 50px; border: none; background: #00AEEF; color: white; font-size: 24px; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .calendar-nav-btn:hover { background: #0088CC; }
+        .calendar-title { font-size: 24px; font-weight: 700; color: #333; }
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; }
+        .calendar-weekday { text-align: center; font-weight: 600; color: #666; padding: 10px 0; font-size: 14px; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-day { aspect-ratio: 1; border: 2px solid #e0e0e0; background: white; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; position: relative; }
+        .calendar-day:hover:not(.disabled):not(.empty):not(.full) { background: #00AEEF; color: white; border-color: #00AEEF; }
+        .calendar-day.today { border-color: #f39c12; background: #fff3cd; }
+        .calendar-day.selected { background: #00AEEF; color: white; border-color: #00AEEF; }
+        .calendar-day.disabled { color: #ccc; cursor: not-allowed; background: #f5f5f5; }
+        .calendar-day.full { color: #e74c3c; cursor: not-allowed; background: #ffeaea; border-color: #e74c3c; }
+        .calendar-day.empty { border: none; cursor: default; }
+        .calendar-day .slots-indicator { font-size: 9px; color: #27ae60; margin-top: 2px; }
+        .calendar-day.full .slots-indicator { color: #e74c3c; }
+        .calendar-close { margin-top: 20px; width: 100%; padding: 15px; background: #95a5a6; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .calendar-close:hover { background: #7f8c8d; }
+        .confirm-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .confirm-modal.show { display: flex; }
+        .confirm-content { background: white; border-radius: 20px; padding: 35px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        .confirm-title { font-size: 26px; font-weight: 900; color: #333; margin-bottom: 25px; text-align: center; }
+        .confirm-info { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+        .confirm-row { display: flex; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; }
+        .confirm-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .confirm-label { font-weight: 700; color: #555; min-width: 100px; font-size: 15px; }
+        .confirm-value { color: #000; font-weight: 600; font-size: 15px; flex: 1; }
+        .confirm-buttons { display: flex; gap: 12px; }
+        .confirm-buttons button { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer; transition: all 0.3s; }
+        .confirm-buttons .btn-no { background: #95a5a6; color: white; }
+        .confirm-buttons .btn-no:hover { background: #7f8c8d; }
+        .confirm-buttons .btn-yes { background: linear-gradient(135deg, #00AEEF 0%, #0088CC 100%); color: white; }
+        .confirm-buttons .btn-yes:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 174, 239, 0.4); }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 3000; justify-content: center; align-items: center; flex-direction: column; }
+        .loading-overlay.show { display: flex; }
+        .loading-spinner { width: 50px; height: 50px; border: 5px solid #e0e0e0; border-top-color: #00AEEF; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 20px; font-size: 18px; font-weight: 600; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="background: white; display: inline-block; padding: 20px 40px; border-radius: 15px; margin-bottom: 15px;">
+                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 5px;">(주)홈케어</div>
+                <div style="font-size: 36px; font-weight: 900; color: #000; letter-spacing: -1px;">깨끗한<span style="color: #e74c3c;">집</span></div>
+            </div>
+            <p style="font-size: 18px; font-weight: 500; margin-top: 15px;">배관 스케일링 서비스 예약</p>
+        </div>
+
+        <div class="form-container">
+            <div class="company-info">
+                <div class="company-info-title">📌 (주)홈케어 깨끗한집</div>
+                <div class="company-links">
+                    <a href="http://www.xn--9l0bs0bb58byrk.com/sub0101.php" target="_blank" class="company-link">🌐 회사 홈페이지</a>
+                    <a href="https://www.youtube.com/@%EA%B9%A8%EC%A7%91%EB%8B%A5%ED%84%B0" target="_blank" class="company-link">📺 유튜브 채널</a>
+                </div>
+                <div class="process-info">
+                    <div style="font-weight: 700; margin-bottom: 10px; font-size: 14px; color: #00AEEF;">🔧 난방/수도 배관 스케일링 방식</div>
+                    <div style="font-size: 11px; color: #666; margin-bottom: 10px; background: #e8f4f8; padding: 8px; border-radius: 6px;">
+                        <strong>특허 번호 제10-0885390호</strong> 획득<br>독자적인 친환경 장치 사용
+                    </div>
+                    <div class="process-step"><span class="step-num">1</span> <strong>이온화수기 사용</strong> - 자체 제작 이온화수기로 물(H₂O) 분자를 분해하여 강 알칼리 수소수와 오존수 생성</div>
+                    <div class="process-step"><span class="step-num">2</span> <strong>화학적 용해 (수소수)</strong> - 수소수가 배관 내 녹과 슬러지 분자를 만나 약 150배 팽창시켜 쉽게 박리</div>
+                    <div class="process-step"><span class="step-num">3</span> <strong>생물학적 살균 (오존수)</strong> - 오존수로 배관 표면 멸균, 항균·살균 효과로 배관 내부를 위생적으로 유지</div>
+                    <div class="process-step"><span class="step-num">4</span> <strong>저압 세척</strong> - 기존 수압(6~10bar)보다 낮은 4bar의 안전한 압력으로 배관 손상 없이 오염물 제거</div>
+                </div>
+            </div>
+
+            <div class="success-message" id="successMessage">✅ 예약 접수되었습니다!</div>
+
+            <div class="form-group">
+                <label>이름 <span class="required">*</span></label>
+                <input type="text" id="name" placeholder="홍길동">
+            </div>
+
+            <div class="form-group">
+                <label>전화번호 <span class="required">*</span></label>
+                <input type="tel" id="phone" placeholder="010-1234-5678" maxlength="13">
+            </div>
+
+            <div class="form-group">
+                <label>집주소 (동 호수까지 기입) <span class="required">*</span></label>
+                <textarea id="address" rows="3" placeholder="예: 충남아파트 621동 1302호"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">서비스 희망 날짜 <span class="required">*</span></label>
+                <div class="date-selector" id="dateSelector">
+                    <div class="date-selector-text date-selector-placeholder" id="dateDisplay">📅 날짜를 선택하세요</div>
+                </div>
+            </div>
+
+            <div class="form-group" id="timeOptionsContainer">
+                <label style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">가능한 시간대 선택 (여러 개 선택 가능) <span class="required">*</span></label>
+                <div class="service-options" id="timeOptions">
+                    <div class="service-card" data-value="오전 9시 - 12시">
+                        <div class="service-content"><span class="service-name">오전 9시 - 12시</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="오후 1시 - 4시">
+                        <div class="service-content"><span class="service-name">오후 1시 - 4시</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="오후 4시 - 7시">
+                        <div class="service-content"><span class="service-name">오후 4시 - 7시</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="종일 가능 (9시-7시)">
+                        <div class="service-content"><span class="service-name">⭐ 종일 가능 (9시-7시)</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>아파트 평수 <span class="required">*</span></label>
+                <div class="service-options" id="sizeOptions">
+                    <div class="service-card" data-value="30평형(20평형 포함)">
+                        <div class="service-content"><span class="service-name">30평형 (20평형 포함)</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="40평형">
+                        <div class="service-content"><span class="service-name">40평형</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="50평형">
+                        <div class="service-content"><span class="service-name">50평형</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="60평형">
+                        <div class="service-content"><span class="service-name">60평형</span></div>
+                        <span class="checkmark"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>서비스 종류 <span class="required">*</span></label>
+                <div class="service-options" id="serviceOptions">
+                    <p style="color: #888; font-size: 14px; margin-bottom: 10px;">먼저 아파트 평수를 선택해주세요</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">결제 방법 <span class="required">*</span></label>
+                <div class="service-options" id="paymentOptions">
+                    <div class="service-card" data-value="현금영수증" data-vat="true">
+                        <div class="service-content">
+                            <span class="service-name">💵 현금영수증</span>
+                            <span style="font-size: 12px; color: #e74c3c; font-weight: 600;">+10% 부가세</span>
+                        </div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="카드" data-vat="true">
+                        <div class="service-content">
+                            <span class="service-name">💳 카드</span>
+                            <span style="font-size: 12px; color: #e74c3c; font-weight: 600;">+10% 부가세</span>
+                        </div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="계좌이체" data-vat="false">
+                        <div class="service-content">
+                            <span class="service-name">🏦 계좌이체</span>
+                            <span style="font-size: 12px; color: #27ae60; font-weight: 600;">부가세 없음</span>
+                        </div>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div class="service-card" data-value="법인" data-vat="true">
+                        <div class="service-content">
+                            <span class="service-name">🏢 법인 (세금계산서)</span>
+                            <span style="font-size: 12px; color: #e74c3c; font-weight: 600;">+10% 부가세</span>
+                        </div>
+                        <span class="checkmark"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="price-summary" id="priceSummary" style="display: none;">
+                <div class="price-row">
+                    <span class="price-label">서비스 금액</span>
+                    <span class="price-value" id="basePrice">0원</span>
+                </div>
+                <div class="price-row" id="vatRow" style="display: none;">
+                    <span class="price-label">부가세 (10%)</span>
+                    <span class="price-value" id="vatPrice">0원</span>
+                </div>
+                <div class="price-row">
+                    <span class="price-label">총 결제예정금액</span>
+                    <span class="price-value" id="totalPrice">0원</span>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" type="button">예약하기</button>
+        </div>
+    </div>
+
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-title">📋 입력하신 정보가 맞나요?</div>
+            <div class="confirm-info" id="confirmInfo"></div>
+            <div class="confirm-buttons">
+                <button class="btn-no" onclick="closeConfirmModal()">아니오</button>
+                <button class="btn-yes" onclick="confirmBooking()">예, 접수합니다</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" id="prevMonth">◀</button>
+                <div class="calendar-title" id="calendarTitle">2024년 1월</div>
+                <button class="calendar-nav-btn" id="nextMonth">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div class="calendar-weekday" style="color: #e74c3c;">일</div>
+                <div class="calendar-weekday">월</div>
+                <div class="calendar-weekday">화</div>
+                <div class="calendar-weekday">수</div>
+                <div class="calendar-weekday">목</div>
+                <div class="calendar-weekday">금</div>
+                <div class="calendar-weekday" style="color: #3498db;">토</div>
+            </div>
+            <div class="calendar-days" id="calendarDays"></div>
+            <button class="calendar-close" id="closeCalendar">닫기</button>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">예약 접수 중...</div>
+    </div>
+
+    <script>
+        var GOOGLE_SCRIPT_URL = '';
+        var SHEET_ID = '18GV3tMuJKgOEfTZllnm93pMRbutlaYKnxHgp3rNpC-Y';
+
+        var selectedSize = '';
+        var selectedService = '';
+        var selectedDate = null;
+        var selectedTimes = [];
+        var selectedPayment = '';
+        var selectedPaymentVat = false;
+        var currentYear = new Date().getFullYear();
+        var currentMonth = new Date().getMonth();
+        var tempBookingData = null;
+        var managerSchedules = {};
+        var dateAvailability = {};
+
+        var priceTable = {
+            '30평형(20평형 포함)': { water: 150000, heating: 210000, both: 280000 },
+            '40평형': { water: 180000, heating: 250000, both: 320000 },
+            '50평형': { water: 210000, heating: 290000, both: 360000 },
+            '60평형': { water: 250000, heating: 330000, both: 400000 }
+        };
+
+        function formatPrice(price) {
+            return price.toLocaleString() + '원';
+        }
+
+        function loadManagerSchedules() {
+            var managers = JSON.parse(localStorage.getItem('managers') || '[]');
+            managerSchedules = {};
+            
+            managers.forEach(function(manager) {
+                var vacationKey = 'vacations_' + manager;
+                var vacations = JSON.parse(localStorage.getItem(vacationKey) || '[]');
+                managerSchedules[manager] = { vacations: vacations, bookings: [] };
+            });
+
+            for (var key in localStorage) {
+                if (key.startsWith('booking:')) {
+                    var booking = JSON.parse(localStorage.getItem(key));
+                    if (booking.manager && booking.manager !== '미배정' && managerSchedules[booking.manager]) {
+                        managerSchedules[booking.manager].bookings.push({
+                            date: booking.serviceDate,
+                            timeSlots: booking.timeSlots || []
+                        });
+                    }
+                }
+            }
+            updateDateAvailability();
+        }
+
+        function updateDateAvailability() {
+            dateAvailability = {};
+            var managers = Object.keys(managerSchedules);
+            if (managers.length === 0) return;
+
+            var today = new Date();
+            for (var i = 0; i < 60; i++) {
+                var checkDate = new Date(today);
+                checkDate.setDate(today.getDate() + i);
+                var dateStr = checkDate.getFullYear() + '-' + String(checkDate.getMonth() + 1).padStart(2, '0') + '-' + String(checkDate.getDate()).padStart(2, '0');
+
+                var availableSlots = { '오전 9시 - 12시': 0, '오후 1시 - 4시': 0, '오후 4시 - 7시': 0, '종일 가능 (9시-7시)': 0 };
+
+                managers.forEach(function(manager) {
+                    var schedule = managerSchedules[manager];
+                    var isVacation = schedule.vacations.some(function(v) { return v.date === dateStr; });
+                    if (isVacation) return;
+
+                    var bookedSlots = [];
+                    schedule.bookings.forEach(function(b) {
+                        if (b.date === dateStr) bookedSlots = bookedSlots.concat(b.timeSlots);
+                    });
+
+                    if (!bookedSlots.includes('오전 9시 - 12시') && !bookedSlots.includes('종일 가능 (9시-7시)')) availableSlots['오전 9시 - 12시']++;
+                    if (!bookedSlots.includes('오후 1시 - 4시') && !bookedSlots.includes('종일 가능 (9시-7시)')) availableSlots['오후 1시 - 4시']++;
+                    if (!bookedSlots.includes('오후 4시 - 7시') && !bookedSlots.includes('종일 가능 (9시-7시)')) availableSlots['오후 4시 - 7시']++;
+                    if (bookedSlots.length === 0) availableSlots['종일 가능 (9시-7시)']++;
+                });
+
+                dateAvailability[dateStr] = availableSlots;
+            }
+        }
+
+        function updateTimeOptions() {
+            if (!selectedDate) return;
+            var dateStr = selectedDate.getFullYear() + '-' + String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + String(selectedDate.getDate()).padStart(2, '0');
+            var availability = dateAvailability[dateStr];
+            var timeCards = document.querySelectorAll('#timeOptions .service-card');
+
+            timeCards.forEach(function(card) {
+                var timeValue = card.getAttribute('data-value');
+                card.classList.remove('disabled', 'selected');
+                if (availability && availability[timeValue] === 0) card.classList.add('disabled');
+            });
+            selectedTimes = [];
+        }
+
+        document.getElementById('dateSelector').addEventListener('click', function() {
+            document.getElementById('calendarModal').classList.add('show');
+            renderCalendar();
+        });
+
+        document.getElementById('closeCalendar').addEventListener('click', function() {
+            document.getElementById('calendarModal').classList.remove('show');
+        });
+
+        document.getElementById('prevMonth').addEventListener('click', function() {
+            currentMonth--;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', function() {
+            currentMonth++;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        });
+
+        function renderCalendar() {
+            var monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+            document.getElementById('calendarTitle').textContent = currentYear + '년 ' + monthNames[currentMonth];
+
+            var firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            var today = new Date();
+            var todayDate = today.getDate();
+            var todayMonth = today.getMonth();
+            var todayYear = today.getFullYear();
+
+            var calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+
+            for (var i = 0; i < firstDay; i++) {
+                var emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarDays.appendChild(emptyDay);
+            }
+
+            for (var day = 1; day <= daysInMonth; day++) {
+                var dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                var dayNumber = document.createElement('span');
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+
+                var isToday = day === todayDate && currentMonth === todayMonth && currentYear === todayYear;
+                var isPast = new Date(currentYear, currentMonth, day) < new Date(todayYear, todayMonth, todayDate);
+                var dateStr = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                var availability = dateAvailability[dateStr];
+
+                if (isToday) dayElement.classList.add('today');
+
+                if (isPast) {
+                    dayElement.classList.add('disabled');
+                } else if (availability) {
+                    var totalSlots = availability['오전 9시 - 12시'] + availability['오후 1시 - 4시'] + availability['오후 4시 - 7시'];
+                    
+                    if (totalSlots === 0) {
+                        dayElement.classList.add('full');
+                        var indicator = document.createElement('div');
+                        indicator.className = 'slots-indicator';
+                        indicator.textContent = '마감';
+                        dayElement.appendChild(indicator);
+                    } else {
+                        (function(d) {
+                            dayElement.addEventListener('click', function() {
+                                selectedDate = new Date(currentYear, currentMonth, d);
+                                var year = selectedDate.getFullYear();
+                                var month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                                var dayStr = String(selectedDate.getDate()).padStart(2, '0');
+                                document.getElementById('dateDisplay').textContent = year + '년 ' + parseInt(month) + '월 ' + parseInt(dayStr) + '일';
+                                document.getElementById('dateDisplay').classList.remove('date-selector-placeholder');
+                                document.getElementById('calendarModal').classList.remove('show');
+                                updateTimeOptions();
+                            });
+                        })(day);
+
+                        if (selectedDate && day === selectedDate.getDate() && currentMonth === selectedDate.getMonth() && currentYear === selectedDate.getFullYear()) {
+                            dayElement.classList.add('selected');
+                        }
+                    }
+                } else {
+                    (function(d) {
+                        dayElement.addEventListener('click', function() {
+                            selectedDate = new Date(currentYear, currentMonth, d);
+                            var year = selectedDate.getFullYear();
+                            var month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                            var dayStr = String(selectedDate.getDate()).padStart(2, '0');
+                            document.getElementById('dateDisplay').textContent = year + '년 ' + parseInt(month) + '월 ' + parseInt(dayStr) + '일';
+                            document.getElementById('dateDisplay').classList.remove('date-selector-placeholder');
+                            document.getElementById('calendarModal').classList.remove('show');
+                            updateTimeOptions();
+                        });
+                    })(day);
+
+                    if (selectedDate && day === selectedDate.getDate() && currentMonth === selectedDate.getMonth() && currentYear === selectedDate.getFullYear()) {
+                        dayElement.classList.add('selected');
+                    }
+                }
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        document.getElementById('phone').addEventListener('input', function(e) {
+            var value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 3 && value.length <= 7) value = value.slice(0, 3) + '-' + value.slice(3);
+            else if (value.length > 7) value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+            e.target.value = value;
+        });
+
+        var timeCards = document.querySelectorAll('#timeOptions .service-card');
+        for (var i = 0; i < timeCards.length; i++) {
+            timeCards[i].addEventListener('click', function() {
+                if (this.classList.contains('disabled')) return;
+                var value = this.getAttribute('data-value');
+                var index = selectedTimes.indexOf(value);
+                if (index > -1) { selectedTimes.splice(index, 1); this.classList.remove('selected'); }
+                else { selectedTimes.push(value); this.classList.add('selected'); }
+            });
+        }
+
+        var sizeCards = document.querySelectorAll('#sizeOptions .service-card');
+        for (var i = 0; i < sizeCards.length; i++) {
+            sizeCards[i].addEventListener('click', function() {
+                var cards = document.querySelectorAll('#sizeOptions .service-card');
+                for (var j = 0; j < cards.length; j++) cards[j].classList.remove('selected');
+                this.classList.add('selected');
+                selectedSize = this.getAttribute('data-value');
+                selectedService = '';
+                updateServiceOptions(selectedSize);
+                updatePriceSummary();
+            });
+        }
+
+        var paymentCards = document.querySelectorAll('#paymentOptions .service-card');
+        for (var i = 0; i < paymentCards.length; i++) {
+            paymentCards[i].addEventListener('click', function() {
+                var cards = document.querySelectorAll('#paymentOptions .service-card');
+                for (var j = 0; j < cards.length; j++) cards[j].classList.remove('selected');
+                this.classList.add('selected');
+                selectedPayment = this.getAttribute('data-value');
+                selectedPaymentVat = this.getAttribute('data-vat') === 'true';
+                updatePriceSummary();
+            });
+        }
+
+        function updateServiceOptions(size) {
+            var serviceContainer = document.getElementById('serviceOptions');
+            var prices = priceTable[size];
+            if (!prices) { serviceContainer.innerHTML = '<p style="color: #888; font-size: 14px;">평수를 먼저 선택해주세요</p>'; return; }
+
+            var html = '';
+            html += '<div class="service-card" data-value="수도+난방 배관 스케일링 (' + formatPrice(prices.both) + ')" data-price="' + prices.both + '"><div class="service-content"><span class="service-name">수도+난방 배관 스케일링</span><span style="font-size: 18px; font-weight: 700; color: #00AEEF;">' + formatPrice(prices.both) + '</span></div><span class="checkmark"></span></div>';
+            html += '<div class="service-card" data-value="난방배관 스케일링 (' + formatPrice(prices.heating) + ')" data-price="' + prices.heating + '"><div class="service-content"><span class="service-name">난방배관 스케일링</span><span style="font-size: 18px; font-weight: 700; color: #00AEEF;">' + formatPrice(prices.heating) + '</span></div><span class="checkmark"></span></div>';
+            html += '<div class="service-card" data-value="수도배관 스케일링 (' + formatPrice(prices.water) + ')" data-price="' + prices.water + '"><div class="service-content"><span class="service-name">수도배관 스케일링</span><span style="font-size: 18px; font-weight: 700; color: #00AEEF;">' + formatPrice(prices.water) + '</span></div><span class="checkmark"></span></div>';
+            
+            serviceContainer.innerHTML = html;
+            
+            var serviceCards = document.querySelectorAll('#serviceOptions .service-card');
+            for (var i = 0; i < serviceCards.length; i++) {
+                serviceCards[i].addEventListener('click', function() {
+                    var cards = document.querySelectorAll('#serviceOptions .service-card');
+                    for (var j = 0; j < cards.length; j++) cards[j].classList.remove('selected');
+                    this.classList.add('selected');
+                    selectedService = this.getAttribute('data-value');
+                    updatePriceSummary();
+                });
+            }
+        }
+
+        function updatePriceSummary() {
+            var priceSummary = document.getElementById('priceSummary');
+            if (!selectedService || !selectedPayment) { priceSummary.style.display = 'none'; return; }
+
+            var priceMatch = selectedService.match(/\(([0-9,]+)원\)/);
+            if (!priceMatch) { priceSummary.style.display = 'none'; return; }
+
+            var basePrice = parseInt(priceMatch[1].replace(/,/g, ''));
+            var vatAmount = selectedPaymentVat ? Math.round(basePrice * 0.1) : 0;
+            var totalAmount = basePrice + vatAmount;
+
+            document.getElementById('basePrice').textContent = formatPrice(basePrice);
+            if (selectedPaymentVat) { document.getElementById('vatRow').style.display = 'flex'; document.getElementById('vatPrice').textContent = formatPrice(vatAmount); }
+            else { document.getElementById('vatRow').style.display = 'none'; }
+            document.getElementById('totalPrice').textContent = formatPrice(totalAmount);
+            priceSummary.style.display = 'block';
+        }
+
+        document.getElementById('submitBtn').onclick = function() {
+            var name = document.getElementById('name').value.trim();
+            var phone = document.getElementById('phone').value.trim();
+            var address = document.getElementById('address').value.trim();
+
+            if (!name) { alert('이름을 입력해주세요!'); document.getElementById('name').focus(); return; }
+            if (!phone) { alert('전화번호를 입력해주세요!'); document.getElementById('phone').focus(); return; }
+            if (!address) { alert('주소를 입력해주세요!'); document.getElementById('address').focus(); return; }
+            if (!selectedDate) { alert('서비스 희망 날짜를 선택해주세요!'); return; }
+            if (selectedTimes.length === 0) { alert('가능한 시간대를 선택해주세요!'); return; }
+            if (!selectedSize) { alert('아파트 평수를 선택해주세요!'); return; }
+            if (!selectedService) { alert('서비스 종류를 선택해주세요!'); return; }
+            if (!selectedPayment) { alert('결제 방법을 선택해주세요!'); return; }
+
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = String(now.getMonth() + 1).padStart(2, '0');
+            var day = String(now.getDate()).padStart(2, '0');
+            var hour = String(now.getHours()).padStart(2, '0');
+            var minute = String(now.getMinutes()).padStart(2, '0');
+
+            var serviceYear = selectedDate.getFullYear();
+            var serviceMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            var serviceDay = String(selectedDate.getDate()).padStart(2, '0');
+            var serviceDateString = serviceYear + '-' + serviceMonth + '-' + serviceDay;
+
+            var priceMatch = selectedService.match(/\(([0-9,]+)원\)/);
+            var basePrice = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : 0;
+            var vatAmount = selectedPaymentVat ? Math.round(basePrice * 0.1) : 0;
+            var totalAmount = basePrice + vatAmount;
+
+            tempBookingData = {
+                id: now.getTime(),
+                date: year + '-' + month + '-' + day,
+                receivedDate: year + '-' + month + '-' + day,
+                timestamp: year + '-' + month + '-' + day + ' ' + hour + ':' + minute,
+                serviceDate: serviceDateString,
+                timeSlots: selectedTimes,
+                name: name,
+                phone: phone,
+                address: address,
+                size: selectedSize,
+                service: selectedService,
+                status: 'received',
+                manager: '미배정',
+                assignmentSent: false,
+                assignmentAccepted: false,
+                revenue: totalAmount,
+                basePrice: basePrice,
+                vatAmount: vatAmount,
+                managerPay: 0,
+                unpaid: totalAmount,
+                paymentMethod: selectedPayment,
+                depositDate: '',
+                category: selectedPayment === '법인' ? '법인' : '개인'
+            };
+
+            var confirmInfo = document.getElementById('confirmInfo');
+            confirmInfo.innerHTML = 
+                '<div class="confirm-row"><div class="confirm-label">이름</div><div class="confirm-value">' + tempBookingData.name + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">전화번호</div><div class="confirm-value">' + tempBookingData.phone + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">주소</div><div class="confirm-value">' + tempBookingData.address + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">서비스 날짜</div><div class="confirm-value">' + tempBookingData.serviceDate + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">희망 시간</div><div class="confirm-value">' + tempBookingData.timeSlots.join(', ') + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">평형</div><div class="confirm-value">' + tempBookingData.size + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">서비스</div><div class="confirm-value">' + tempBookingData.service + '</div></div>' +
+                '<div class="confirm-row"><div class="confirm-label">결제방법</div><div class="confirm-value">' + tempBookingData.paymentMethod + '</div></div>' +
+                '<div class="confirm-row" style="background: #d4edda; margin: -20px; margin-top: 15px; padding: 20px; border-radius: 0 0 12px 12px;"><div class="confirm-label" style="color: #155724; font-size: 18px;">총 결제금액</div><div class="confirm-value" style="color: #155724; font-size: 20px; font-weight: 900;">' + formatPrice(totalAmount) + (selectedPaymentVat ? ' (VAT 포함)' : '') + '</div></div>';
+
+            document.getElementById('confirmModal').classList.add('show');
+        };
+
+        function confirmBooking() {
+            if (!tempBookingData) { alert('예약 정보가 없습니다!'); return; }
+            document.getElementById('loadingOverlay').classList.add('show');
+            localStorage.setItem('booking:' + tempBookingData.id, JSON.stringify(tempBookingData));
+            saveToGoogleSheets(tempBookingData);
+
+            setTimeout(function() {
+                document.getElementById('loadingOverlay').classList.remove('show');
+                document.getElementById('confirmModal').classList.remove('show');
+                document.getElementById('successMessage').classList.add('show');
+
+                document.getElementById('name').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('address').value = '';
+                selectedDate = null;
+                document.getElementById('dateDisplay').textContent = '📅 날짜를 선택하세요';
+                document.getElementById('dateDisplay').classList.add('date-selector-placeholder');
+                
+                var allCards = document.querySelectorAll('.service-card');
+                for (var i = 0; i < allCards.length; i++) allCards[i].classList.remove('selected');
+                selectedSize = '';
+                selectedService = '';
+                selectedTimes = [];
+                selectedPayment = '';
+                selectedPaymentVat = false;
+                document.getElementById('serviceOptions').innerHTML = '<p style="color: #888; font-size: 14px; margin-bottom: 10px;">먼저 아파트 평수를 선택해주세요</p>';
+                document.getElementById('priceSummary').style.display = 'none';
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(function() { document.getElementById('successMessage').classList.remove('show'); }, 5000);
+                alert('✅ 예약 접수되었습니다!\n빠른 시일 내에 연락드리겠습니다.');
+                tempBookingData = null;
+                loadManagerSchedules();
+            }, 1500);
+        }
+
+        function saveToGoogleSheets(data) {
+            console.log('📤 Google Sheets 저장 시도:', data);
+            
+            // ⚠️ 배포 후 아래 URL을 실제 웹 앱 URL로 교체하세요!
+            // 예: 'https://script.google.com/macros/s/XXXX/exec'
+            if (!GOOGLE_SCRIPT_URL) {
+                console.log('⚠️ GOOGLE_SCRIPT_URL이 설정되지 않았습니다. 구글시트 연동을 위해 Apps Script 배포 후 URL을 설정하세요.');
+                return;
+            }
+            
+            var payload = {
+                action: 'newBooking',
+                bookingId: data.id,
+                name: data.name,
+                phone: data.phone,
+                address: data.address,
+                size: data.size,
+                service: data.service,
+                serviceDate: data.serviceDate,
+                timeSlots: data.timeSlots ? data.timeSlots.join(', ') : '미정',
+                paymentMethod: data.paymentMethod,
+                basePrice: data.basePrice,
+                vatAmount: data.vatAmount,
+                totalPrice: data.totalPrice,
+                customerType: data.paymentMethod === '법인(세금계산서)' ? '법인' : '개인'
+            };
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(function() {
+                console.log('✅ Google Sheets 전송 완료');
+            })
+            .catch(function(error) {
+                console.error('❌ Google Sheets 전송 실패:', error);
+            });
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+            tempBookingData = null;
+        }
+
+        window.addEventListener('load', function() {
+            console.log('✅ 예약 페이지 로드');
+            loadManagerSchedules();
+        });
+    </script>
+</body>
+</html>
